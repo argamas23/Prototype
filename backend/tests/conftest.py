@@ -30,6 +30,12 @@ def _reset_process_cache():
     get_cache.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def _disable_firebase_init(mocker):
+    # Tests should not require real Firebase credentials or network access.
+    mocker.patch("app.config.firebase.ensure_firebase_app")
+
+
 @pytest.fixture
 def anyio_backend():
     return "asyncio"
