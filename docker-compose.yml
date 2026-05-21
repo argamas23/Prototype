@@ -1,0 +1,50 @@
+x-backend-base: &backend_base
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  working_dir: /app/backend
+
+services:
+  gateway:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.gateway.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8000:8000"
+    environment:
+      GATEWAY_MEALS_SERVICE_URL: http://meals:8001
+      GATEWAY_WORKOUTS_SERVICE_URL: http://workouts:8002
+      GATEWAY_GOALS_SERVICE_URL: http://goals:8003
+      GATEWAY_DASHBOARD_SERVICE_URL: http://dashboard:8004
+      GATEWAY_PROFILE_SERVICE_URL: http://profile:8005
+      GATEWAY_ANALYTICS_SERVICE_URL: http://analytics:8006
+    depends_on:
+      - meals
+      - workouts
+      - goals
+      - dashboard
+      - profile
+      - analytics
+
+  meals:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.meals.main:app", "--host", "0.0.0.0", "--port", "8001"]
+
+  workouts:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.workouts.main:app", "--host", "0.0.0.0", "--port", "8002"]
+
+  goals:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.goals.main:app", "--host", "0.0.0.0", "--port", "8003"]
+
+  dashboard:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.dashboard.main:app", "--host", "0.0.0.0", "--port", "8004"]
+
+  profile:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.profile.main:app", "--host", "0.0.0.0", "--port", "8005"]
+
+  analytics:
+    <<: *backend_base
+    command: ["uvicorn", "microservices.analytics.main:app", "--host", "0.0.0.0", "--port", "8006"]

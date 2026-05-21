@@ -1,0 +1,18 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny, with an explicit per-document ownership rule:
+    // a document is readable/writable only by the user whose UID is stored in `uid`.
+    //
+    // For clients, this enforces that the authenticated Firebase user can only
+    // access documents that are explicitly tagged with their UID.
+    match /{document=**} {
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.uid;
+
+      allow read, update, delete: if request.auth != null
+        && request.auth.uid == resource.data.uid;
+    }
+  }
+}
+

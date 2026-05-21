@@ -1,0 +1,33 @@
+\contentsline {section}{\numberline {1}Overview}{1}{section.2}%
+\contentsline {section}{\numberline {2}Task 1: Requirements and Subsystems}{1}{section.3}%
+\contentsline {subsection}{\numberline {2.1}Functional requirements}{1}{subsection.4}%
+\contentsline {subsection}{\numberline {2.2}Non-functional requirements}{1}{subsection.6}%
+\contentsline {subsection}{\numberline {2.3}Key architecturally significant requirements (ASRs)}{2}{subsection.8}%
+\contentsline {subsection}{\numberline {2.4}Subsystem overview}{3}{subsection.15}%
+\contentsline {section}{\numberline {3}Task 2: Architecture Framework}{4}{section.17}%
+\contentsline {subsection}{\numberline {3.1}Stakeholders}{4}{subsection.18}%
+\contentsline {subsection}{\numberline {3.2}Architecture Views}{4}{subsection.20}%
+\contentsline {subsubsection}{\numberline {3.2.1}Architectural Overview}{4}{subsubsection.21}%
+\contentsline {subsubsection}{\numberline {3.2.2}API Design View}{5}{subsubsection.24}%
+\contentsline {subsubsection}{\numberline {3.2.3}Frontend and Backend Structure}{5}{subsubsection.27}%
+\contentsline {subsubsection}{\numberline {3.2.4}Frontend C3 Diagram}{6}{subsubsection.30}%
+\contentsline {subsubsection}{\numberline {3.2.5}Backend C3 Diagram}{6}{subsubsection.33}%
+\contentsline {subsubsection}{\numberline {3.2.6}Interaction Flow}{7}{subsubsection.36}%
+\contentsline {subsubsection}{\numberline {3.2.7}Meal Logging Sequence}{8}{subsubsection.39}%
+\contentsline {subsubsection}{\numberline {3.2.8}Workout Logging Sequence}{8}{subsubsection.42}%
+\contentsline {subsection}{\numberline {3.3}Major Design Decisions (Architecture Decision Records)}{9}{subsection.45}%
+\contentsline {subsubsection}{\numberline {3.3.1}ADR-0001: Strict layered monolith architecture}{9}{subsubsection.46}%
+\contentsline {subsubsection}{\numberline {3.3.2}ADR-0002: Authenticated backend API boundary for all user data writes}{9}{subsubsection.47}%
+\contentsline {subsubsection}{\numberline {3.3.3}ADR-0003: Denormalised Firestore meal document}{10}{subsubsection.48}%
+\contentsline {subsubsection}{\numberline {3.3.4}ADR-0004: Strategy + Chain-of-Responsibility for nutrition lookup}{10}{subsubsection.49}%
+\contentsline {subsubsection}{\numberline {3.3.5}ADR-0005: Graceful dashboard degradation under partial service failures}{11}{subsubsection.50}%
+\contentsline {section}{\numberline {4}Task 3: Architectural Tactics and Patterns}{12}{section.51}%
+\contentsline {subsection}{\numberline {4.1}Architectural tactics}{12}{subsection.52}%
+\contentsline {subsection}{\numberline {4.2}Implementation patterns}{12}{subsection.54}%
+\contentsline {subsubsection}{\numberline {4.2.1}Pattern 1: Strategy Pattern (Recommendation Engine)}{12}{subsubsection.55}%
+\contentsline {subsubsection}{\numberline {4.2.2}Pattern 2: Repository Pattern}{13}{subsubsection.58}%
+\contentsline {section}{\numberline {5}Task 4: Prototype Implementation and Architecture Analysis}{15}{section.62}%
+\contentsline {subsection}{\numberline {5.1}Implemented prototype}{15}{subsection.63}%
+\contentsline {subsection}{\numberline {5.2}Architecture comparison: layered monolith vs.\ microservices}{19}{subsection.85}%
+\contentsline {subsection}{\numberline {5.3}NFR quantification}{19}{subsection.87}%
+\contentsline {section}{\numberline {6}Reflection and Lessons Learned}{21}{section.89}%

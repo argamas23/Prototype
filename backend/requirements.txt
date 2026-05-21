@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+slowapi
+firebase-admin
+python-dotenv
+pydantic
+pydantic-settings
+python-multipart
+email-validator
+pytest
+pytest-mock
+httpx
+numpy
+requests
+Pillow
+pandas
+onnxruntime

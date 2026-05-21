@@ -1,0 +1,101 @@
+class_id,class_name,category,region,dietary
+1,Aloo Gobi,Main Course,North India,Veg
+2,Aloo Mutter,Main Course,North India,Veg
+3,Aloo Paratha,"Breakfast, Main Course",North India,Veg
+4,Amritsari Kulcha,Breakfast,North India,Veg
+5,Appam,Breakfast,South India,Veg
+6,Aviyal,Main Course,South India,Veg
+7,Balushahi,Dessert,North India,Veg
+8,Bhindi Masala,Main Course,North India,Veg
+9,Biryani,Main Course,South India,Non-Veg
+10,Bisi Bele Bath,Main Course,South India,Veg
+11,Burger,Street Food,International,Veg
+12,Butter Naan,Main Course,North India,Veg
+13,Chaas,Beverage,West India,Veg
+14,Chai,Beverage,North India,Veg
+15,Chana Masala,Main Course,North India,Veg
+16,Chapati,"Main Course, Breakfast",North India,Veg
+17,Chicken 65,"Street Food, Appetizer",South India,Non-Veg
+18,Chicken Chettinad,Main Course,South India,Non-Veg
+19,Chicken Wings,Appetizer,International,Non-Veg
+20,Chilli Chicken,Main Course,International,Non-Veg
+21,Chivda,"Appetizer, Street Food",West India,Veg
+22,Chole Bhature,"Street Food, Main Course",North India,Veg
+23,Curd Rice,Main Course,South India,Veg
+24,Dabeli,Street Food,West India,Veg
+25,Dal Khichdi,Main Course,North India,Veg
+26,Dal Makhani,Main Course,North India,Veg
+27,Dhokla,"Breakfast, Street Food",West India,Veg
+28,Egg Curry,Main Course,North India,Non-Veg
+29,Falooda,"Dessert, Beverage",North India,Veg
+30,Fish Curry,Main Course,East India,Non-Veg
+31,Fish Fry,"Appetizer, Main Course",South India,Non-Veg
+32,Fried Rice,Main Course,International,Veg
+33,Gajar Ka Halwa,Dessert,North India,Veg
+34,Garlic Bread,Appetizer,International,Veg
+35,Garlic Naan,Main Course,North India,Veg
+36,Ghevar,Dessert,West India,Veg
+37,Grilled Sandwich,Main Course,International,Veg
+38,Gujhia,Dessert,North India,Veg
+39,Gulab Jamun,Dessert,North India,Veg
+40,Hara Bhara Kebab,Main Course,North India,Veg
+41,Idiyappam,Breakfast,South India,Veg
+42,Idli,Breakfast,South India,Veg
+43,Jalebi,Dessert,North India,Veg
+44,Kaathi Rolls,"Street Food, Main Course",East India,Non-Veg
+45,Kadai Paneer,Main Course,North India,Veg
+46,Kaju Katli,Dessert,North India,Veg
+47,Karimeen Pollichathu,Main Course,South India,Non-Veg
+48,Kerala Fish Curry,Main Course,South India,Non-Veg
+49,Kheer,Dessert,North India,Veg
+50,Kothu Parotta,"Street Food, Main Course",South India,Veg
+51,Kulfi,Dessert,North India,Veg
+52,Laddu,Dessert,North India,Veg
+53,Lemon Rice,Main Course,South India,Veg
+54,Litti Chokha,Main Course,East India,Veg
+55,Macher Jhol,Main Course,East India,Non-Veg
+56,Manchurian,Main Course,International,Veg
+57,Masala Dosa,"Breakfast, Main Course",South India,Veg
+58,Masala Papad,"Appetizer, Street Food",North India,Veg
+59,Medu Vada,Breakfast,South India,Veg
+60,Methi Thepla,Breakfast,West India,Veg
+61,Misal Pav,"Breakfast, Street Food",West India,Veg
+62,Modak,Dessert,West India,Veg
+63,Momos,Street Food,East India,Veg
+64,Moong Dal Halwa,Dessert,North India,Veg
+65,Mysore Pak,Dessert,South India,Veg
+66,Navratan Korma,Main Course,North India,Veg
+67,Paani Puri,Street Food,North India,Veg
+68,Pakora,"Street Food, Appetizer",North India,Veg
+69,Palak Paneer,Main Course,North India,Veg
+70,Paneer Masala,Main Course,North India,Veg
+71,Paniyaram,Breakfast,South India,Veg
+72,Papdi Chaat,Street Food,North India,Veg
+73,Pav Bhaji,Street Food,West India,Veg
+74,Payasam,Dessert,South India,Veg
+75,Phirni,Dessert,North India,Veg
+76,Pizza,Street Food,International,Veg
+77,Poha,Breakfast,West India,Veg
+78,Pongal,Breakfast,South India,Veg
+79,Puran Poli,Dessert,West India,Veg
+80,Puri Bhaji,"Breakfast, Main Course",North India,Veg
+81,Puttu,Breakfast,South India,Veg
+82,Rajma Chawal,Main Course,North India,Veg
+83,Rasam,Beverage,South India,Veg
+84,Rasgulla,Dessert,East India,Veg
+85,Rava Dosa,"Breakfast, Main Course",South India,Veg
+86,Sabudana Khichdi,Breakfast,West India,Veg
+87,Sabudana Vada,Appetizer,West India,Veg
+88,Sambar Rice,Main Course,South India,Veg
+89,Samosa,"Street Food, Appetizer",North India,Veg
+90,Sandesh,Dessert,East India,Veg
+91,Seekh Kebab,Main Course,North India,Non-Veg
+92,Set Dosa,"Breakfast, Main Course",South India,Veg
+93,Sev Puri,Street Food,West India,Veg
+94,Tamarind Rice,Main Course,South India,Veg
+95,Thali,Main Course,West India,Veg
+96,Thukpa,Main Course,East India,Non-Veg
+97,Unni Appam,"Dessert, Appetizer",South India,Veg
+98,Upma,"Breakfast, Main Course",South India,Veg
+99,Uttapam,"Breakfast, Main Course",South India,Veg
+100,Vada Pav,"Street Food, Breakfast",West India,Veg

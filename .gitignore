@@ -1,0 +1,36 @@
+# ── secrets & credentials ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+backend/security/*.json
+backend/security/*.pem
+*-adminsdk-*.json
+serviceAccountKey*.json
+
+# ── python ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.venv/
+venv/
+
+# ── node / frontend ───────────────────────────────────────────────────
+node_modules
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# ── tooling / editors ─────────────────────────────────────────────────
+.codex
+.DS_Store
+.idea/
+.vscode/
+*.log

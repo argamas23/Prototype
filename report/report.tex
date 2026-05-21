@@ -1,0 +1,1044 @@
+\documentclass[11pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+% hypertexnames=false avoids duplicate destination warnings when page numbering/counters reset.
+\usepackage[hypertexnames=false]{hyperref}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,fit,positioning,shapes.geometric}
+\usepackage{listings}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+
+\newcommand{\ProjectName}{HealthSync}
+\newcommand{\CourseName}{S26CS6.401 Software Engineering}
+\newcommand{\TeamNumber}{2}
+
+% Visible TODO markers (intentionally rendered in the PDF so we can fill them before submission).
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{TODO:} #1}}
+% Visible "re-check / rephrase" marker.
+\newcommand{\RECHECK}[1]{\textcolor{orange}{\textbf{RECHECK:} #1}}
+% Diagram placeholder marker.
+\newcommand{\DIAGRAM}[1]{\textcolor{violet}{\textbf{[DIAGRAM NEEDED]:} #1}}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  breaklines=true,
+  frame=single,
+  framerule=0.3pt,
+  xleftmargin=0.6em,
+  xrightmargin=0.6em
+}
+
+\begin{document}
+
+% ===========================
+% Title Page
+% ===========================
+\begin{titlepage}
+  \centering
+  {\Large \CourseName \par}
+  \vspace{0.35cm}
+  {\Large \textbf{Project 3 Report} \par}
+  \vspace{1.0cm}
+  {\huge \textbf{\ProjectName} \par}
+  \vspace{0.25cm}
+  {\Large Team \TeamNumber \par}
+  \vspace{0.8cm}
+
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Team Member} & \textbf{Roll Number} \\
+    \midrule
+    Kartik Vij          & 2022102060 \\
+    Kushagra Dhingra    & 2022115004 \\
+    Lakshmi Dedeepya    & 2024801007 \\
+    Prithvi Karthik     & 2022101020 \\
+    Samagra Bharti      & 2022115007 \\
+    \bottomrule
+  \end{tabular}
+
+  \vfill
+  \textbf{Repository link:} https://github.com/Prithvi-k/SE-Project-3 \par
+  \vspace{0.35cm}
+  \textbf{Date:} \today \par
+\end{titlepage}
+
+\pagenumbering{roman}
+{\setlength{\parskip}{0pt}\tableofcontents}
+\newpage
+\pagenumbering{arabic}
+
+% ===========================
+% 1) Overview
+% ===========================
+\section{Overview}
+
+\ProjectName\ is an integrated health tracking platform that combines meal logging, workout tracking,
+health goal management, progress analytics, and personalized workout recommendations in a single system.
+The motivation is to reduce the fragmentation users face when they rely on multiple apps to track diet,
+exercise, and fitness goals.
+
+% \subsection{Prototype focus for Project 3}
+% For the Project 3 deliverables, we implement and document one primary end-to-end nontrivial flow:
+% \textbf{authenticated meal logging with optional image-based meal analysis}.
+% This flow exercises authentication, validation, API boundaries, persistence, UI/UX, and testing,
+% and serves as the spine on which the rest of the architecture is demonstrated.
+
+% \subsection{Tech stack}
+% \begin{itemize}[leftmargin=1.2em]
+%   \item \textbf{Frontend:} React 18 + TypeScript + Vite, Tailwind CSS + shadcn/ui, React Router v6,
+%         TanStack React Query
+%   \item \textbf{Backend:} FastAPI (Python), structured as a layered monolith
+%         (\texttt{routes $\to$ schemas $\to$ services $\to$ repositories}); a microservices
+%         decomposition is prototyped on the \texttt{comparison} branch
+%   \item \textbf{Database:} Firebase Firestore (NoSQL, per-user partitioned)
+%   \item \textbf{Authentication:} Firebase Authentication (email/password + Google OAuth)
+%   \item \textbf{Image analysis:} ONNX Runtime with a fine-tuned MobileNet-family model,
+%         plus a tiered nutrition lookup chain
+%   \item \textbf{Observability:} In-process Prometheus-compatible metrics, structured JSON logging,
+%         correlation-ID middleware
+%   \item \textbf{Testing:} pytest (backend, 56 tests, 76\% line coverage) and Vitest (frontend)
+%   \item \textbf{Deployment:} Docker + Docker Compose (gateway + 6 services, target architecture)
+% \end{itemize}
+
+% \subsection{Implemented features (current repository state)}
+% \begin{itemize}[leftmargin=1.2em]
+%   \item Authentication (email/password + Google OAuth), protected routes
+%   \item Meal logging (manual) with multi-item nutrition tracking
+%   \item Image-based meal analysis to auto-fill detected foods and estimated nutrition
+%   \item Workout logging (type, duration, intensity, calories burned, notes)
+%   \item Daily goals (calories/macros, optional target weight)
+%   \item Unified daily dashboard summary (calories in/out/net, macro breakdown, counts)
+%   \item History view for meals/workouts with delete
+%   \item User profile (personal details + dietary preferences/allergies)
+%   \item Progress analytics for a date range (trend charts + breakdowns)
+%   \item Workout plans (admin-managed plans, publicly accessible)
+%   \item Personalized workout recommendations (rule-based engine, goal- and history-aware)
+% \end{itemize}
+
+% ===========================
+% Task 1: Requirements and Subsystems
+% ===========================
+\section{Task 1: Requirements and Subsystems}
+
+\subsection{Functional requirements}
+
+The initial proposal defined the core functional scope: account management, meal logging, workout tracking, goals, dashboard, analytics, and recommendations.
+During implementation, several flows were expanded and clarified to make the system usable end-to-end.
+
+\begin{longtable}{p{1.2cm} p{5.8cm} p{6.5cm}}
+  \toprule
+  \textbf{ID} & \textbf{Requirement} & \textbf{Success criteria} \\
+  \midrule
+  \endhead
+
+  FR-1  & Users shall be able to register, login/logout, and maintain an authenticated session
+        & \texttt{POST /auth/register} returns 201; \texttt{POST /auth/login} returns a valid
+          Firebase ID token; \texttt{POST /auth/logout} clears the client token; any
+          \texttt{/api/} call without a valid token returns HTTP 401. \\[2pt]
+
+  FR-2  & Users shall be able to sign in using email/password and Google OAuth
+        & Both providers issue a Firebase ID token accepted by \texttt{get\_current\_user};
+          neither path exposes any credential in the frontend bundle or URL. \\[2pt]
+
+  FR-3  & Authenticated users shall be able to create and update a personal profile
+        & \texttt{GET /api/v1/profile} returns all stored fields; \texttt{PUT /api/v1/profile}
+          with changed fields returns 200 and the updated document; subsequent GET reflects
+          the change. \\[2pt]
+
+  FR-4  & Authenticated users shall be able to log a meal with meal type, date, time, and
+          one or more food items
+        & \texttt{POST /api/v1/meals} with a valid payload returns 201; the meal is
+          retrievable via \texttt{GET /api/v1/meals?dateFrom=\ldots}; a request with
+          zero items or a missing required field returns 422. \\[2pt]
+
+  FR-5  & Each meal item shall include name, quantity, unit, calories, protein, carbs, and fat
+        & All seven fields present and non-null; quantity $> 0$; calories, protein, carbs,
+          fat $\geq 0$; Pydantic validation rejects out-of-range values with 422. \\[2pt]
+
+  FR-6  & The system shall calculate and persist meal totals server-side
+        & Totals in the stored meal document equal the server-computed sum across items;
+          submitting a payload with manually inflated client totals has no effect on
+          the persisted values. \\[2pt]
+
+  FR-7  & Users shall be able to upload a meal photo for automatic food detection
+          and nutrition autofill
+        & \texttt{POST /api/v1/meals/analyze-image} with a valid image returns at least one
+          detected food item with non-zero macro estimates; an unrecognisable image returns
+          a structured error (\texttt{no\_food\_detected}), not a 500. \\[2pt]
+
+  FR-8  & Authenticated users shall be able to log workouts
+        & \texttt{POST /api/v1/workouts} returns 201; type, duration ($> 0$), intensity,
+          calories burned ($\geq 0$) are stored; missing required fields return 422. \\[2pt]
+
+  FR-9  & Users shall be able to set and update daily goals
+        & \texttt{PUT /api/v1/goals} creates or replaces the active goal; only one active
+          goal exists per user at any time; \texttt{GET /api/v1/goals} returns it. \\[2pt]
+
+  FR-10 & Users shall be able to view a unified daily dashboard
+        & \texttt{GET /api/v1/dashboard?date=\ldots} returns \texttt{calories\_in},
+          \texttt{calories\_out}, \texttt{net\_calories}, macro breakdown, meal count, and
+          workout count; response includes all fields even when no data exists for that day
+          (zeroed values, not missing keys). \\[2pt]
+
+  FR-11 & Users shall be able to view history of logged meals and workouts and delete entries
+        & History endpoint returns items for the requested date range; \texttt{DELETE
+          /api/v1/meals/\{id\}} returns 204 and the entry is absent from subsequent history
+          calls; deleting a non-existent ID returns 404. \\[2pt]
+
+  FR-12 & Users shall be able to view progress analytics across a date range
+        & \texttt{GET /api/v1/analytics?dateFrom=\ldots\&dateTo=\ldots} returns trend
+          data for every day in the range; requesting a future range returns an empty
+          dataset, not an error. \\[2pt]
+
+  FR-13 & The system shall provide personalized workout recommendations based on goals
+          and historical behavior
+        & \texttt{GET /api/v1/recommendations} returns $\geq 1$ recommendation when the
+          user has an active goal; the recommendation strategy matches the goal type
+          (strength / cardio / weight-loss). \\
+
+  \bottomrule
+\end{longtable}
+
+
+% \subsection{Persistence model (Firestore)}
+% All data is stored per user under a \texttt{users/\{uid\}} partition. The core Firestore paths:
+% \begin{lstlisting}
+% users/{uid}/meals/{mealId}          <- meal summary + denormalized items[]
+% users/{uid}/workouts/{workoutId}
+% users/{uid}/goals/active
+% users/{uid}/profile/main
+% users/{uid}/recommendations/{id}
+% plans/{planId}                      <- admin-managed plans (global collection)
+% \end{lstlisting}
+
+% \textbf{N+1 optimization:} meal items are denormalized into the parent meal document at write time,
+% eliminating the sub-collection fan-out on reads. Listing $N$ meals now costs $1$ Firestore
+% collection read rather than the former $N{+}1$ (see Section~\ref{sec:nfr-quantification}).
+
+\subsection{Non-functional requirements}
+
+The proposal identified six quality attributes: scalability, performance, extensibility,
+maintainability, security/privacy, and reliability/testability.
+We split Reliability and Testability into separate rows and add Data Integrity and
+Observability based on implementation evidence.
+
+\begin{longtable}{p{1.2cm} p{2.5cm} p{4.8cm} p{5.0cm}}
+  \toprule
+  \textbf{ID} & \textbf{Attribute} & \textbf{Necessity} & \textbf{Success threshold} \\
+  \midrule
+  \endhead
+
+  NFR-1 & Security / Privacy
+        & All \texttt{/api/} endpoints reject unauthenticated requests;
+          reads/writes scoped to the authenticated UID only.
+        & 0 endpoints accessible without a valid Firebase ID token;
+          \texttt{gitleaks}: 0 secrets in HEAD;
+          \texttt{slowapi} rate limits active on auth and image-analysis routes. \\[2pt]
+
+  NFR-2 & Data Integrity
+        & Business-logic aggregates computed server-side; input validated at API boundary.
+        & 0 client-trusted aggregate values in any \texttt{POST} schema;
+          $\geq$87\% of input fields carry explicit Pydantic range / format constraints. \\[2pt]
+
+  NFR-3 & Performance
+        & Firestore reads sub-linear in history size;
+          initial JS bundle small for fast initial load.
+        & $\leq 1$ Firestore read per meal-list page (N+1 fix);
+          initial JS bundle $\leq 150$\,KB gzip
+          (measured: \textbf{137.14\,KB}). \\[2pt]
+
+  NFR-4 & Scalability
+        & Multiple users and increasing per-user data supported without correctness
+          issues; read-heavy endpoints cached.
+        & No per-user data leakage under concurrent load;
+          routing layer sustains $\geq$70\,RPS with p95 $\leq$10\,ms
+          (measured: \textbf{73.8\,RPS, p95 3.78\,ms}). \\[2pt]
+
+  NFR-5 & Maintainability
+        & Strict separation of concerns; cyclomatic complexity bounded.
+        & Average CC $\leq$ grade B (radon);
+          no single function $>$ grade D;
+          measured: \textbf{avg A (2.98)}, one outlier at D (27). \\[2pt]
+
+  NFR-6 & Extensibility
+        & Adding a new health data source requires no edits to existing modules.
+        & Extension cost $=$ \textbf{+1 class, 0 edits};
+          \texttt{test\_open\_closed\_extension\_via\_new\_provider}
+          passes in CI. \\[2pt]
+
+  NFR-7 & Reliability
+        & Graceful degradation under partial failures;
+          health probes exposed.
+        & Partial-failure response (non-5xx) on dashboard when one domain is
+          degraded; \texttt{/health} and \texttt{/ready} endpoints return 200 / 503
+          correctly. \\[2pt]
+
+  NFR-8 & Testability
+        & Core logic unit-testable; CI enforces a coverage floor.
+        & Backend line coverage $\geq$60\% (CI gate \texttt{--cov-fail-under=60});
+          measured: \textbf{76\%}, \textbf{56/56} tests passing in \textbf{\textasciitilde{}1\,s}. \\[2pt]
+
+  NFR-9 & Observability
+        & Every request carries a correlation ID;
+          Prometheus metrics exposed.
+        & 100\% of requests carry \texttt{x-request-id} by construction;
+          \texttt{/metrics} exposes $\geq$2 metric families
+          (measured: \textbf{2}: counter + histogram). \\
+
+  \bottomrule
+\end{longtable}
+
+\subsection{Key architecturally significant requirements (ASRs)}
+A requirement is architecturally significant when satisfying it forces a structural decision that
+cannot be easily refactored later, rules out otherwise attractive alternatives, or has
+system-wide ripple effects. The six below meet that bar.
+
+\begin{enumerate}[leftmargin=1.4em]
+
+  \item \textbf{Authentication + per-user data isolation} (FR-1/FR-2, NFR-1) \\
+  \textit{Why it is a driver:} Health data is private; a data-isolation failure is a security
+  incident, not a bug. Allowing direct client-to-Firestore writes would scatter auth logic
+  across the frontend and require maintaining Firestore security rules in sync with business
+  rules. \\
+  \textit{Structural decision forced:} All writes go through a backend that verifies the
+  Firebase ID token and uses the extracted \texttt{uid} to scope every Firestore path
+  (\texttt{users/\{uid\}/...}). The \texttt{get\_current\_user} FastAPI dependency is wired
+  into every route via \texttt{Depends}, making accidental unauthenticated access a compile-time
+  mistake rather than a runtime gap.
+
+  \item \textbf{Server-side totals and Pydantic validation} (FR-4/5/6, NFR-2) \\
+  \textit{Why it is a driver:} If the backend accepted client-computed nutrition totals, a
+  tampered client could store arbitrary macro values. Pydantic validation at the route boundary
+  is the only place guaranteed to run regardless of client behaviour. \\
+  \textit{Structural decision forced:} Business logic (total computation) must live in the
+  service layer, not in routes or repositories. This drove the four-layer architecture; removing
+  the service layer would require pushing logic into routes (breaking testability) or trusting
+  clients (breaking integrity).
+
+  \item \textbf{ML inference on the hot request path} (FR-7, NFR-3) \\
+  \textit{Why it is a driver:} ONNX inference is CPU-bound and takes hundreds of milliseconds.
+  Running it synchronously on FastAPI's single-threaded async event loop would block every
+  concurrent request---all other users would see elevated latency during any image upload. \\
+  \textit{Structural decision forced:} Inference is offloaded via \texttt{asyncio.to\_thread},
+  introducing an explicit concurrency seam in the meals service. The nutrition lookup chain
+  (Strategy + Chain-of-Responsibility) was extracted from the service because adding new food
+  databases would otherwise require editing inference-adjacent code.
+
+  \item \textbf{Extensible nutrition lookup} (NFR-6) \\
+  \textit{Why it is a driver:} Nutrition accuracy is a product quality concern that will improve
+  over time (adding regional databases, external APIs). Hard-coding the lookup order inside a
+  service file means each improvement is a risky diff on business-logic code. \\
+  \textit{Structural decision forced:} The \texttt{NutritionProvider} protocol and
+  \texttt{NutritionResolver} chain (ADR-0004). Any design that keeps the lookup inside a single
+  function fails NFR-6 because the extension cost is always $\geq 1$ edit.
+
+  \item \textbf{Cache-aside for read-heavy aggregation endpoints} (FR-10, NFR-4) \\
+  \textit{Why it is a driver:} The dashboard and analytics services re-read every meal and
+  workout for the user on every request. Under any real load this becomes a Firestore read
+  amplification problem. Without a cache, horizontal scaling only moves the bottleneck to
+  Firestore quotas. \\
+  \textit{Structural decision forced:} An explicit \texttt{Cache} protocol with pluggable backends
+  (in-memory for the monolith, Redis-ready for multi-instance). Services depend on the protocol,
+  not a concrete backend---Dependency Inversion Principle applied at the infrastructure boundary.
+
+  \item \textbf{Progress analytics read model} (FR-12, NFR-3/4) \\
+  \textit{Why it is a driver:} Analytics queries span arbitrary date ranges over unbounded
+  per-user history. A naive scan-and-aggregate on every request grows linearly with user
+  data volume, violating NFR-3. \\
+  \textit{Structural decision forced:} Firestore predicate push-down (\texttt{where} clauses)
+  and write-time denormalization (items embedded in meal documents, ADR-0003) so that list
+  queries never fan out into per-document sub-collection reads. Together these keep the
+  analytics service read cost at $O(\mathrm{range\ size})$ rather than $O(\mathrm{total\ history})$.
+
+\end{enumerate}
+
+\subsection{Subsystem overview}
+
+\textbf{Decomposition principle.}
+Subsystems are grouped by \emph{data ownership and capability boundary}, not by technical layer.
+Each domain service owns one Firestore collection namespace and exposes one cohesive set of
+operations on it; no two services read or write the same collection.
+The frontend is separated because it runs in an untrusted execution environment (the browser)
+and must never hold service-account credentials.
+Image recognition and nutrition lookup are extracted because they carry their own heavyweight
+dependencies (ONNX runtime, food databases) whose failure modes and extension cost differ
+from plain CRUD, and they are only consumed by the meals pipeline.
+
+\textbf{Cross-cutting interfaces.}
+Three concerns span every subsystem and are implemented once rather than replicated:
+\begin{itemize}[leftmargin=1.2em, topsep=2pt]
+  \item \textbf{Authentication} --- \texttt{get\_current\_user} (auth subsystem) is injected
+        via FastAPI \texttt{Depends} into every domain route; no domain service re-implements
+        token verification.
+  \item \textbf{Error propagation} --- all domain errors are subclasses of \texttt{DomainError}
+        (errors subsystem); a single handler in \texttt{main.py} maps them to HTTP status codes,
+        so domain services never import from the transport layer.
+  \item \textbf{Observability} --- correlation-ID middleware, structured logging, and Prometheus
+        metrics are registered once on the FastAPI app; every request is automatically traced
+        and timed regardless of which domain route handles it.
+\end{itemize}
+
+\begin{longtable}{p{3.5cm} p{5.5cm} p{5.2cm}}
+  \toprule
+  \textbf{Subsystem} & \textbf{Role} & \textbf{Interfaces with} \\
+  \midrule
+  \endhead
+
+  Web frontend
+  & All user-facing interactions: auth flows, dashboard, logging, analytics, recommendations, plans.
+  & Authentication (token acquisition); all backend API routes (via \texttt{apiFetch}). \\
+
+  Authentication
+  & Firebase ID token issuance (client SDK) and verification (Admin SDK via
+    \texttt{get\_current\_user}).
+  & All domain services (cross-cutting); Firebase Auth cloud service. \\
+
+  Meals service
+  & CRUD for meal records; delegates image analysis and nutrition lookup.
+  & Image recognition; nutrition lookup; persistence; authentication. \\
+
+  Workouts service
+  & CRUD for workout records.
+  & Persistence; authentication. \\
+
+  Goals service
+  & Manage the single active goal per user.
+  & Persistence; authentication; recommendations (reads active goal). \\
+
+  Dashboard service
+  & Aggregate daily calories-in/out, macro breakdown, counts; cached.
+  & Persistence; caching subsystem; authentication. \\
+
+  Profile service
+  & Store and retrieve user profile (demographics, dietary preferences).
+  & Persistence; authentication; recommendations (reads profile). \\
+
+  Analytics service
+  & Compute trend metrics over a date range; predicate push-down to Firestore.
+  & Persistence; caching subsystem; authentication. \\
+
+  Recommendations
+  & Rule-based workout plan generation using goal + history; Strategy pattern.
+  & Goals service; profile service; persistence; authentication. \\
+
+  Plans service
+  & Admin-managed global workout plan catalogue; admin auth via custom header.
+  & Persistence; authentication. \\
+
+  Image recognition
+  & ONNX MobileNet food classification; async thread-pool offload.
+  & Meals service (internal call only); ONNX runtime (file dependency). \\
+
+  Nutrition lookup
+  & Tiered food-name-to-macro resolution via Chain-of-Responsibility.
+  & Meals service (internal call only); food database files. \\
+
+  Persistence
+  & Firebase Firestore read/write under \texttt{users/\{uid\}/} and \texttt{plans/}.
+  & All domain services (cross-cutting); Firebase Firestore cloud service. \\
+
+  Observability
+  & Prometheus metrics, structured JSON logging, correlation-ID propagation.
+  & All subsystems (cross-cutting, registered once on the FastAPI app). \\
+
+  \bottomrule
+\end{longtable}
+
+% ===========================
+% Task 2: Architecture Framework
+% ===========================
+\newpage
+\section{Task 2: Architecture Framework}
+
+\subsection{Stakeholders}
+
+\begin{longtable}{p{5.0cm} p{8.5cm}}
+  \toprule
+  \textbf{Stakeholder} & \textbf{Primary concerns} \\
+  \midrule
+  \endhead
+
+  End user (health tracker)
+    & Fast entry, accurate nutrition totals, trend visibility,
+      private health data, user-friendly UI. \\
+  Plan Admin
+    & Clear content management paths, reliable data integrity,
+      and a straightforward way to add/update workout plans. \\
+  Development team
+    & Clear module boundaries, local dev workflow, testable
+      modules, straightforward extension paths. \\
+  \bottomrule
+\end{longtable}
+
+\subsection{Architecture Views}
+
+\subsubsection{Architectural Overview}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.70\linewidth]{"../docs/Diagrams/layered"}
+  \caption{High-level architectural overview of \ProjectName.}
+\end{figure}
+
+\subsubsection{API Design View}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.88\linewidth]{"../docs/Diagrams/API Design View"}
+  \caption{REST API design view}
+\end{figure}
+
+\subsubsection{Frontend and Backend Structure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.50\linewidth]{"../docs/Diagrams/Frontend_Backend"}
+  \caption{Component/layer diagram}
+\end{figure}
+
+\subsubsection{Frontend C3 Diagram}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{"../docs/Diagrams/frontend_c3"}
+  \caption{C3 diagram for the frontend}
+\end{figure}
+
+\subsubsection{Backend C3 Diagram}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{"../docs/Diagrams/backend_c3"}
+  \caption{C3 diagram for the backend}
+\end{figure}
+
+\subsubsection{Interaction Flow}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.82\linewidth]{"../docs/Diagrams/Interaction Flow"}
+  \caption{End-to-end interaction flow}
+\end{figure}
+
+\subsubsection{Meal Logging Sequence}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{"../docs/Diagrams/Meal Logging"}
+  \caption{UML sequence diagram for the Log Meal flow}
+\end{figure}
+
+\subsubsection{Workout Logging Sequence}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=\linewidth]{"../docs/Diagrams/Workout Sequence"}
+  \caption{UML sequence diagram for the Log Workout flow}
+\end{figure}
+
+% ===========================
+% Major Design Decisions (ADRs)
+% ===========================
+\subsection{Major Design Decisions (Architecture Decision Records)}
+
+
+\subsubsection{ADR-0001: Strict layered monolith architecture}
+\textbf{Status:} Accepted (layered monolith) \\
+\textbf{Context:} \ProjectName\ spans multiple feature domains (meals, workouts, goals, dashboard,
+profile, analytics, recommendations, plans). Early development called for clear module ownership and easy local setup, while the proposal simultaneously required
+demonstrating a decomposable service boundary. Premature distribution would have added
+inter-service networking and distributed tracing overhead before the domain models had stabilised. \\
+\textbf{Decision:} Deliver the prototype as a single FastAPI application organised in a strict
+\textit{routes $\to$ schemas $\to$ services $\to$ repositories} layering. Each layer may only import from the layer directly below it. \\
+\textbf{Consequences:}
+\begin{itemize}[leftmargin=1.2em]
+  \item (+) Single process: one port, one log stream, one-command start.
+  \item (+) Layer discipline means each domain can be extracted to its own service with changes
+        confined to one layer.
+  \item (--) A process-level bug (e.g., OOM, unhandled exception) can affect all feature domains.
+        Mitigated by the domain error hierarchy (see ADR-0002) and layer isolation.
+  \item (--) Horizontal scaling requires scaling the entire process; individual aspects
+        (e.g., image analysis) cannot be scaled independently in the monolith.
+\end{itemize}
+
+\subsubsection{ADR-0002: Authenticated backend API boundary for all user data writes}
+\textbf{Status:} Accepted \\
+\textbf{Context:} Meal, workout, goal, and profile records are private health data. The alternative
+of direct client-side Firestore writes would require maintaining Firestore security rules in sync
+with client logic and would allow a tampered client to forge nutrition totals or access another
+user's partition. \\
+\textbf{Decision:} All data mutations pass through FastAPI route handlers. The frontend obtains a
+short-lived Firebase ID token and \texttt{apiFetch} attaches it as a Bearer header. The backend
+\texttt{get\_current\_user} dependency (in the auth/security subsystem) verifies the token via the
+Firebase Admin SDK and extracts the verified \texttt{uid}, which is the only identity used to
+scope Firestore reads and writes. The client SDK is used for authentication only; it never touches
+Firestore directly.
+diagrams. \\
+\textbf{Consequences:}
+\begin{itemize}[leftmargin=1.2em]
+  \item (+) Auth, validation, and logging are enforced at one trusted point; routes cannot
+        accidentally bypass them (FastAPI \texttt{Depends} wiring makes omission a type error).
+  \item (+) Server-side nutrition total computation eliminates the risk of a manipulated client
+        payload - a key requirement for data integrity (NFR-2).
+  \item (+) Service layer is testable without a live Firestore instance (uid can be a plain string
+        in tests).
+  \item (--) Prototype requires both frontend and backend servers running concurrently.
+  \item (--) One additional network hop compared to direct Firestore client writes.
+\end{itemize}
+
+\subsubsection{ADR-0003: Denormalised Firestore meal document}
+\textbf{Status:} Accepted \\
+\textbf{Context:} The initial Firestore model stored meal items in a sub-collection. Listing a user's meal history
+therefore required $N{+}1$ reads: one collection scan to get $N$ meal summaries, plus one
+sub-collection read per meal to get items. At page size 100, this was 101 Firestore reads per
+list call - a direct violation of NFR-3 (sub-linear read cost). \\
+\textbf{Decision:} Embed food items as an \texttt{items[]} array directly in the parent meal
+document at write time, alongside server-computed aggregate totals. Meal summary and item detail
+are now co-located in a single document. A backward-compatibility read path in the meals
+service handles any legacy sub-collection rows. \\
+\textbf{Consequences:}
+\begin{itemize}[leftmargin=1.2em]
+  \item (+) Listing $N$ meals costs exactly \textbf{1 Firestore read} instead of $N{+}1$, a $100\times$ reduction at $N{=}100$.
+  \item (+) Removes the async fan-out; the service layer simplifies from a gather step to a single collection scan.
+  \item (--) Meal documents grow with item count; the 1 MB Firestore document limit bounds the maximum items per meal.
+\end{itemize}
+
+\subsubsection{ADR-0004: Strategy + Chain-of-Responsibility for nutrition lookup}
+\textbf{Status:} Accepted \\
+\textbf{Context:} The image analysis endpoint must map a detected food name (e.g., ``samosa'',
+``banana'') to calorie and macro estimates. An initial design hard-coded the priority order and
+fallback logic inside the meals service. Adding a new food database required editing that file,
+violating the Open/Closed Principle and making nutrition accuracy improvements a risky diff
+on a business-logic file. \\
+\textbf{Decision:} Extract the lookup into a \texttt{NutritionProvider} protocol with a single
+\texttt{lookup(name)} method, and a \texttt{NutritionResolver} that walks a prioritised chain
+of providers, short-circuiting on the first non-\texttt{None} hit. Three providers ship:
+an Indian-cuisine database (highest priority), a global common-foods database, and a
+\texttt{DefaultEstimateProvider} as a terminal fallback. The chain is wired once at startup
+in the nutrition subsystem; new sources require only a new class and an insertion point---no
+edits to existing providers or the resolver. \\
+\textbf{Consequences:}
+\begin{itemize}[leftmargin=1.2em]
+  \item (+) Extension cost is just adding a new class.
+  \item (+) Chain short-circuits on the first hit; the expensive \texttt{DefaultEstimateProvider} is only reached for unknown foods.
+  \item (--) Chain order is configuration, not type-system enforced; a misconfigured priority order silently returns lower-accuracy data.
+\end{itemize}
+
+\newpage
+\subsubsection{ADR-0005: Graceful dashboard degradation under partial service failures}
+\textbf{Status:} Accepted \\
+\textbf{Context:} The dashboard aggregates meals, workouts, goals, and profile data in a single
+response. In a multi-service architecture, if any upstream times out, a naive synchronous
+gather will block the entire dashboard until the slowest dependency responds or times out.
+Even in the monolith, a slow Firestore read for one domain should not stall the response for
+the others. Users should see a partial but correct summary rather than a full failure
+(NFR-7). \\
+\textbf{Decision:} In the layered monolith: the dashboard service queries each domain independently
+with short timeouts; missing data produces a zero-valued field rather than an exception. The
+cache-aside layer (in the caching subsystem) absorbs repeated reads: dashboard responses are
+cached with a TTL so a slow upstream affects only the first uncached request. \\
+\textbf{Consequences:}
+\begin{itemize}[leftmargin=1.2em]
+  \item (+) Users can still view available health data even when one domain's backend is degraded.
+  \item (+) Cache-aside (TTL-based) prevents one slow Firestore read from blocking every user
+        request on the hot dashboard endpoint.
+  \item (--) Partial responses require the frontend to handle missing fields gracefully.
+\end{itemize}
+
+% ===========================
+% Task 3: Architectural Tactics and Patterns
+% ===========================
+\newpage
+\section{Task 3: Architectural Tactics and Patterns}
+
+\subsection{Architectural tactics}
+
+\begin{longtable}{p{3.5cm} p{2.4cm} p{4.2cm} p{4.0cm}}
+  \toprule
+  \textbf{Tactic} & \textbf{Quality attr.} & \textbf{How it is applied} & \textbf{Where in code} \\
+  \midrule
+  \endhead
+
+  Authenticate at API boundary
+    & Security
+    & \texttt{get\_current\_user} verifies the Firebase ID token; any missing or invalid
+      token raises \texttt{AuthorizationError} which maps to HTTP 401 before the route
+      handler body executes.
+    & \texttt{app/config/security.py}; injected via \texttt{Depends(get\_current\_user)}
+      in every route file under \texttt{app/routes/}. \\[2pt]
+
+  Validate at multiple boundaries
+    & Integrity
+    & Frontend client-side validation blocks submission for UX.
+      Backend Pydantic schemas enforce non-negative values, max lengths, regex patterns,
+      and bounded list sizes as the authoritative constraint.
+    & \texttt{app/schemas/*.py} (backend); \texttt{frontend/src/pages/LogMeal.tsx} and
+      sibling pages (frontend form validation). \\[2pt]
+
+  Server-side aggregate computation
+    & Integrity
+    & Nutrition totals and dashboard aggregates are computed in the service layer on
+      every write; no endpoint accepts pre-computed totals from the client.
+    & \texttt{app/services/meals\_service.py} (nutrition totals at write time);
+      \texttt{app/services/dashboard\_service.py} (daily aggregates). \\[2pt]
+
+  Cache-Aside with pluggable backends
+    & Performance / Scalability
+    & Dashboard and analytics responses are stored under a keyed TTL cache;
+      a cache miss falls through to Firestore; invalidation happens at write time.
+    & \texttt{app/config/cache.py} (\texttt{Cache} protocol, \texttt{InMemoryTTLCache},
+      \texttt{RedisCache}); used in dashboard and analytics services via
+      \texttt{Depends(get\_cache)}. \\[2pt]
+
+  Async thread-pool offload for CPU-bound I/O
+    & Performance
+    & ONNX image inference is dispatched to a thread-pool worker so the FastAPI
+      async event loop is never blocked; other requests are served concurrently
+      during inference.
+    & \texttt{app/services/meals\_service.py}:
+      \texttt{await asyncio.to\_thread(recognizer.predict, image\_bytes)}. \\[2pt]
+
+  Correlation-ID + structured logging
+    & Observability
+    & HTTP middleware mints a UUID4 \texttt{x-request-id} (or accepts an upstream one),
+      attaches it to every log line, and echoes it on the response header. In microservices
+      mode the gateway propagates the same ID to upstreams.
+    & \texttt{app/main.py} (middleware, lines 55--90);
+      \texttt{microservices/\_base.py} + \texttt{microservices/gateway/proxy.py}
+      (\texttt{comparison} branch). \\[2pt]
+
+  Prometheus in-process metrics
+    & Observability
+    & A zero-dependency metrics registry counts requests and records latency
+      histograms (11 buckets, 5\,ms--10\,s) per route; \texttt{/metrics} exposes
+      Prometheus text format without requiring an external agent.
+    & \texttt{app/observability/metrics.py};
+      registered via \texttt{register\_metrics\_middleware(app)} and
+      \texttt{register\_metrics\_endpoint(app)} at the bottom of \texttt{app/main.py}. \\[2pt]
+
+  React Query stale-while-revalidate + mutation invalidation
+    & Consistency
+    & After every successful mutation (meal log, workout log, goal update) the frontend
+      invalidates the affected query keys, triggering a background refetch so the
+      dashboard and history views reflect the new server state immediately.
+    & \texttt{frontend/src/hooks/useApi.ts};
+      mutation callbacks call \texttt{queryClient.invalidateQueries(\{queryKey: [\ldots]\})}
+      targeting dashboard and history keys. \\
+
+  \bottomrule
+\end{longtable}
+
+\subsection{Implementation patterns}
+
+\subsubsection{Pattern 1: Strategy Pattern (Recommendation Engine)}
+
+\textbf{Intent:} Define a family of algorithms, encapsulate each one, and make them
+interchangeable. The pattern lets the algorithm vary independently from clients that use it.
+
+\textbf{Role in \ProjectName:} The \texttt{RecommendationEngine} selects and executes a
+workout-plan-building algorithm based on the user's goals and profile, without the
+engine itself knowing which concrete strategy is active.
+
+\textbf{Structure:}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Context} --- \texttt{RecommendationEngine}
+        (\texttt{backend/app/services/recommendation\_engine.py}): holds a reference to a
+        \texttt{RecommendationStrategy} and delegates generation to it. The private \texttt{resolve\_strategy(context)}
+        method selects the concrete strategy based on the user's stated goal.
+  \item \textbf{Strategy interface} --- \texttt{RecommendationStrategy}: declares build\_plan(context) and build\_week\_plan(context).
+  \item \textbf{Concrete strategies:}
+    \begin{itemize}[leftmargin=1.2em]
+      \item \texttt{StrengthTrainingStrategy} --- generates strength-focused plans
+      \item \texttt{CardioEnduranceStrategy} --- generates cardio/endurance plans
+      \item \texttt{WeightLossStrategy} --- generates calorie-deficit-oriented plans
+    \end{itemize}
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/Diagrams/Strategy Pattern_Recommendation"}
+  \caption{Strategy Pattern applied to the Recommendation Engine.}
+\end{figure}
+
+\textbf{How it addresses NFRs:}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Extensibility:} adding a new goal type (e.g., \textit{Flexibility}) requires only a new class implementing RecommendationStrategy.
+  \item \textbf{Maintainability:} each strategy is a self-contained module with a single responsibility; they can be read, tested, and evolved independently.
+  \item \textbf{Testability:} the strategy interface can be mocked in unit tests RecommendationEngine without instantiating any real plan-building logic.
+\end{itemize}
+
+
+% ---
+
+\subsubsection{Pattern 2: Repository Pattern}
+
+\textbf{Role in \ProjectName:} All Firestore interactions are channelled through repository classes. Service code never constructs Firestore document paths or executes queries directly, making the data access layer independently testable and swappable.
+
+\textbf{Structure:}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Abstract base} --- \texttt{BaseRepository}: declares the common interface
+        \texttt{get\_by\_id(id)}, \texttt{add(document)}, and \texttt{update(id, document)}.
+  \item \textbf{Concrete repositories:}
+    \begin{itemize}[leftmargin=1.2em]
+      \item \texttt{MealsRepository} --- adds \texttt{get\_meals\_by\_date(user\_id, date)};
+            encapsulates the Firestore path and the date-filter predicate.
+      \item \texttt{WorkoutsRepository} --- adds
+            \texttt{get\_workouts\_in\_range(user\_id, start\_date, end\_date)}; encapsulates the Firestore path and range query.
+    \end{itemize}
+  \item Analogous repositories exist for Goals, Profile, Plans, and Recommendations.
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.78\linewidth]{"../docs/Diagrams/Repository Pattern"}
+  \caption{Repository Pattern: \texttt{BaseRepository} defines the common data-access interface;
+    \texttt{MealsRepository} and \texttt{WorkoutsRepository} extend it with domain-specific
+    query methods, hiding all Firestore path logic from the service layer.}
+\end{figure}
+
+\textbf{How it addresses NFRs:}
+\begin{itemize}[leftmargin=1.2em]
+  \item \textbf{Testability:} Easy to mock the actual db implementation; service tests never touch real Firestore.
+  \item \textbf{Maintainability:} Firestore path construction is in one place; renaming a collection requires editing only the relevant repository file.
+  \item \textbf{Extensibility:} adding a new collection (e.g., weight logs) means creating a new repository subclass without touching any existing service.
+\end{itemize}
+
+% ---
+
+\subsubsection*{Other design patterns present}
+
+\begin{itemize}[leftmargin=1.2em]
+
+  \item \textbf{Chain of Responsibility}
+        (\texttt{backend/app/services/nutrition/providers.py}) \\
+        \texttt{NutritionResolver} walks a list of \texttt{NutritionProvider} objects in
+        priority order and short-circuits on the first non-\texttt{None} hit
+        (Indian foods $\to$ global foods $\to$ default estimate). Each provider decides
+        independently whether it can handle the request; none has knowledge of its neighbours.
+
+  \item \textbf{Facade}
+        (\texttt{backend/app/services/*.py}) \\
+        Each service module (e.g., \texttt{meals\_service.py}, \texttt{dashboard\_service.py})
+        acts as a Facade: it presents a simple, high-level interface to the route layer
+        (\texttt{log\_meal()}, \texttt{get\_dashboard()}) while internally coordinating the
+        repository, cache, image recogniser, and domain error hierarchy. The route handler
+        never needs to know about Firestore or ONNX.
+
+  \item \textbf{Observer}
+        (\texttt{frontend/src/} --- TanStack React Query) \\
+        After every successful mutation (meal log, workout log, goal update), the frontend ensures React Query re-fetches all registered observers of the invalidated key, ensuring the dashboard and history views automatically reflect the latest server state without manual re-rendering.
+
+\end{itemize}
+
+% ===========================
+% Task 4: Prototype Implementation and Architecture Analysis
+% ===========================
+\newpage
+\section{Task 4: Prototype Implementation and Architecture Analysis}
+
+\subsection{Implemented prototype}
+\subsubsection*{Today's Overview on the Dashboard}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Dashboard.png"}
+  \caption{Dashboard UI with Today's Overview.}
+\end{figure}
+
+\subsubsection*{Log Meal form with image analysis}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Log-Meal.png"}
+  \caption{Log Meal form with image analysis results.}
+\end{figure}  
+
+\subsubsection*{Profile page with editable fields}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Profile.png"}
+  \caption{Profile page with editable fields.}
+\end{figure}
+
+\subsubsection*{History page}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/History.png"}
+  \caption{History page showing past workouts.}
+\end{figure}
+
+\subsubsection*{Workout recommendation page}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Plans.png"}
+  \caption{Workout recommendation page showing available plans.}
+\end{figure} 
+
+\subsubsection*{Log Workout form}
+\begin{figure}[H]
+  \centering  
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Log-Workout.png"}
+  \caption{Log Workout form.}
+\end{figure}
+
+\subsubsection*{Progress view with charts}
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.72\linewidth]{"../docs/UI/Progress.png"}
+  \caption{Progress view with charts.}
+\end{figure}
+
+
+\subsection{Architecture comparison: layered monolith vs.\ microservices}
+
+The implemented architecture (\texttt{layered} branch) is a \textbf{strict layered monolith}.
+The comparison architecture (\texttt{comparison} branch) decomposes the same feature set into
+\textbf{six independently-runnable FastAPI services} behind a gateway.
+
+\begin{longtable}{p{2.8cm} p{6.3cm} p{6.1cm}}
+  \toprule
+  \textbf{Concern} & \textbf{Layered monolith (implemented)} & \textbf{Microservices (comparison branch)} \\
+  \midrule
+  \endhead
+
+  Security
+    & Single token-verification dependency; one CORS configuration; one TLS endpoint.
+    & Each service independently verifies tokens (same Firebase Admin SDK); gateway owns CORS; larger attack surface but more granular access control. \\
+
+  Data integrity
+    & Single process; service-to-service calls are in-process function calls with no serialisation overhead.
+    & Service-to-service calls cross network boundaries; JSON serialisation adds latency but makes contracts explicit. \\
+
+  Maintainability
+    & Strict layer separation is enforced by module imports; changes to one feature area can still accidentally reach another via shared utilities.
+    & Physical process isolation prevents cross-domain import accidents; each service has its own \texttt{requirements.txt} and deployment lifecycle. \\
+
+  Performance
+    & No inter-service network hops. Measured: mean \textbf{2.84 ms}, p95 \textbf{4.08 ms}
+      on \texttt{GET /api/v1/meals} (80 RPS, 15 s bench). Cache-aside is per-process (in-memory).
+    & One gateway $\to$ upstream HTTP hop adds \textbf{+1.27 ms mean (+45\%)}, p95 \textbf{5.32 ms}
+      on the same route. Cache must be shared (Redis) across service instances. \\
+
+  Scalability
+    & \textbf{73.8 RPS} (p95 3.78 ms) at the routing layer (\texttt{/health}, 0 errors).
+      Scaling requires scaling the entire process; a single hot path (e.g., image analysis)
+      cannot scale independently.
+    & \textbf{73.9 RPS} (p95 2.73 ms) at the gateway on the same route.
+      Individual services can be scaled horizontally per load profile
+      (e.g., scale the analytics or image-analysis service independently). \\
+
+  Operational complexity
+    & One process, one port, one log stream.
+    & Seven processes, seven ports, distributed tracing required for end-to-end request tracing. \\
+
+  Delivery speed
+    & Single-command start: \texttt{uvicorn app.main:app}.
+    & Seven-command start abstracted by \texttt{run\_microservices.py} or Docker Compose. \\
+
+  \bottomrule
+\end{longtable}
+
+\textbf{Trade-off summary:} The layered monolith is strictly superior for development velocity,
+debugging simplicity, and in-process performance. The microservices decomposition becomes
+valuable when individual services have genuinely different scaling needs or when teams grow large
+enough that independent deployment cycles reduce coordination overhead. For the current team
+size and stage, the monolith is the correct default; the microservices branch serves as a
+forward migration target.
+
+\subsection{NFR quantification}
+\label{sec:nfr-quantification}
+
+\begin{longtable}{p{2.6cm} p{3.0cm} p{3.0cm} p{7.4cm}}
+  \toprule
+  \textbf{NFR} & \textbf{Metric} & \textbf{Result} & \textbf{Method} \\
+  \midrule
+  \endhead
+
+  Performance
+    & Firestore reads per \texttt{GET /api/v1/meals} at \texttt{pageSize=100}
+    & $\mathbf{101 \to 1}$ \textbf{reads}
+    & Items are denormalized into the meal document at write time
+      (meals service). At $N{=}100$: $101 \to 1$ ($100\times$ fewer reads). \\
+
+  Performance (frontend bundle)
+    & Initial JS bundle size (gzip)
+    & \textbf{137.14 KB}
+    & Route-level code splitting via \texttt{React.lazy()} and \texttt{<Suspense>} reduces the initial parse budget. \\
+
+  Maintainability
+    & Average cyclomatic complexity (CC) across \texttt{backend/app/}
+    & \textbf{A (2.98)} average; single D (27) outlier
+    & \texttt{radon cc backend/app -a --total-average};Sole outlier:
+      \texttt{\_compute\_daily\_progress} in the analytics service (rank D, CC=27). Total SLOC: \textbf{2,393} across 52 files; largest file \texttt{recommendation\_engine.py} at 500 SLOC. \\
+
+  Testability
+    & Backend line coverage; test count; suite runtime
+    & \textbf{76\% coverage}, \textbf{56/56 passing}, \textbf{\textasciitilde{}1.0 s}
+    & \texttt{pytest --cov=app --cov-report=term-missing}: 56 tests across
+      16 files, 1,809 statements covered, 430 missed. Suite runs in \textasciitilde{}1.0 s
+      (mocked Firestore, no real I/O). CI enforces \texttt{--cov-fail-under=60}. \\
+
+  Extensibility
+    & Cost to add a new nutrition data source (OCP compliance)
+    & \textbf{+1 class, 0 edits}
+    & \texttt{test\_open\_closed\_extension\_via\_new\_provider} in the backend test suite
+      plugs in a \texttt{SushiProvider} class without editing \texttt{IndianNutritionProvider},
+      \texttt{GlobalCommonFoodsProvider}, \texttt{DefaultEstimateProvider}, or
+      \texttt{NutritionResolver}. Test is green in CI; any future change that closes the
+      chain will fail CI automatically. \\
+
+  Observability
+    & Prometheus metric families; log fields per request; request-ID coverage
+    & \textbf{2 families}; \textbf{6 fields}; \textbf{100\%}
+    & \texttt{/metrics} exposes: \texttt{http\_requests\_total} (counter) and
+      \texttt{http\_request\_duration\_seconds} (histogram, 11 buckets: 5 ms--10 s).
+      Every log line carries: \texttt{request\_id}, \texttt{method}, \texttt{path},
+      \texttt{status\_code}, \texttt{duration\_ms}, \texttt{client\_ip}.
+      Every request mints or inherits an \texttt{x-request-id}---100\% coverage
+      by construction. In the \texttt{comparison} branch the gateway propagates the same ID
+      to the upstream service, enabling cross-hop log joins. \\
+
+  Scalability (routing layer)
+    & Sustained RPS and p95 latency at the routing boundary (\texttt{/health}, no auth),
+      monolith vs.\ gateway
+    & Monolith: \textbf{73.8 RPS}, p95 \textbf{3.78 ms}; Gateway: \textbf{73.9 RPS},
+      p95 \textbf{2.73 ms} (both at 0 errors)
+    & \texttt{bench.py --rps 80 --duration 15} on both stacks; Both saturate the 80 RPS scheduler with zero errors.
+      The gateway is marginally faster on \texttt{/health} because it carries less middleware
+      (no rate-limiter, no domain-error handler). Qualitative scaling advantage of
+      microservices---independent horizontal scaling per service---cannot be captured on a
+      local single-machine bench. \\
+
+  \bottomrule
+\end{longtable}
+
+% ===========================
+% Reflection and Lessons Learned
+% ===========================
+\section{Reflection and Lessons Learned}
+
+\begin{itemize}
+  \item Layered architecture (routes / schemas / services / repositories) made testing fast and clean
+  \item ADRs were useful for making and communicating decisions, and for future reference
+  \item Nutrition accuracy remains unresolved
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,14 @@
+myvenv
+secrets
+.env
+__pycache__/
+venv
+.venv
+healthsync-creds.json
+se-project-3-efec9-f12a6692b5f0.json
+backend/security/se-healthsync-firebase-adminsdk-fbsvc-4427c95604.json
+backend/security/*.json
+*.onnx
+__pycache__/
+myenv/
+.env
