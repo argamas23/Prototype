@@ -9,6 +9,8 @@ python-multipart
 email-validator
 pytest
 pytest-mock
+pytest-cov
+pytest-json-report
 httpx
 numpy
 requests

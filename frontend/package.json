@@ -10,6 +10,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:cit": "bash scripts/run_cit_local.sh",
     "test:watch": "vitest"
   },
   "dependencies": {

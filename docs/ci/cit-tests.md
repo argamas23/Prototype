@@ -25,6 +25,32 @@ Test locations:
 - Backend: `backend/tests/cit/`
 - Frontend: `frontend/src/tests/cit/`
 
+One-command local run (creates `artifacts/` automatically):
+
+```bash
+./scripts/run_cit_local.sh
+```
+
+Backend-only (creates `artifacts/backend` automatically):
+
+```bash
+./backend/scripts/run_cit_local.sh
+```
+
+Frontend-only (creates `artifacts/frontend` automatically):
+
+```bash
+cd frontend
+npm run test:cit
+```
+
+Notes:
+
+- Backend “full telemetry” (JUnit/XML, JSON report, coverage XML) requires `pytest-cov` + `pytest-json-report` (now included in `backend/requirements.txt`).
+- Local scripts attempt to auto-install them (set `CIT_AUTO_INSTALL_PYTEST_REPORTERS=0` to disable).
+- Frontend coverage requires `@vitest/coverage-v8` (scripts attempt a `--no-save` install by default; set `CIT_AUTO_INSTALL_VITEST_COVERAGE_V8=0` to disable).
+- Logs are retained per run under `artifacts/**/runs/<run_id>/` and the most recent outputs are copied to `artifacts/**/latest/`.
+
 Backend:
 
 ```bash
