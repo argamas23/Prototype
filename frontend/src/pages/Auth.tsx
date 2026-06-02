@@ -14,6 +14,7 @@ import {
   signInWithGoogle,
   signUpWithEmail,
 } from "@/services/auth";
+import { formatFirebaseAuthError } from "@/lib/firebaseAuthError";
 
 function PasswordField({
   id,
@@ -93,7 +94,7 @@ export default function Auth() {
       }
       navigate("/dashboard");
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Authentication failed.");
+      setFormError(formatFirebaseAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -106,7 +107,7 @@ export default function Auth() {
       await signInWithGoogle();
       navigate("/dashboard");
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Authentication failed.");
+      setFormError(formatFirebaseAuthError(err));
     } finally {
       setLoading(false);
     }

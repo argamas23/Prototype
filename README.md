@@ -107,6 +107,11 @@ All `/api/v1/*` routes require a Firebase ID token as `Authorization: Bearer <to
   - Verify the backend is running: `curl http://127.0.0.1:8000/health` should return `{"status":"ok"}`.
   - Ensure `frontend/.env` has `VITE_API_BASE_URL=http://127.0.0.1:8000` (some systems resolve `localhost` to IPv6 `::1`).
   - If the backend is running but the browser console shows a CORS error, update `backend/.env` `ALLOWED_ORIGINS` to match your frontend origin (common dev origins: `http://localhost:5173`, `http://127.0.0.1:5173`, `http://[::1]:5173`).
+- **`Firebase: Error (auth/api-key-not-valid--please-pass-a-valid-api-key)` when signing in** means your Firebase Web API key is missing/invalid, or it’s restricted.
+  - Confirm `frontend/.env` has the Firebase *Web App* config values (Firebase Console → Project settings → Your apps).
+  - If you restricted the API key in Google Cloud Console:
+    - Allow the Identity Toolkit / Firebase Authentication API in the key’s API restrictions.
+    - Allow your dev origin (commonly `http://localhost:5173` or `http://127.0.0.1:5173`) in the key’s HTTP referrer allowlist.
 
 ---
 

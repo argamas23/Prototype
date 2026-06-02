@@ -1,33 +1,10 @@
-import { NavLink, useLocation } from "react-router-dom";
-import {
-  LayoutDashboard,
-  UtensilsCrossed,
-  Dumbbell,
-  History,
-  Target,
-  ClipboardList,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  Activity,
-  User,
-  TrendingUp,
-} from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { LogOut, ChevronLeft, ChevronRight, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-
-const navItems = [
-  { label: "Dashboard", to: "/dashboard", icon: LayoutDashboard },
-  { label: "Log Meal", to: "/log-meal", icon: UtensilsCrossed },
-  { label: "Log Workout", to: "/log-workout", icon: Dumbbell },
-  { label: "History", to: "/history", icon: History },
-  { label: "Goals", to: "/goals", icon: Target },
-  { label: "Plans", to: "/plans", icon: ClipboardList },
-  { label: "Progress", to: "/progress", icon: TrendingUp },
-  { label: "Profile", to: "/profile", icon: User },
-];
+import { getVisibleNavItems } from "@/config/navigation";
 
 export function AppSidebar({
   mobileOpen = false,
@@ -40,34 +17,12 @@ export function AppSidebar({
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
 }) {
-  const location = useLocation();
   const { user, planAdmin, signOut } = useAuth();
-  const visibleNavItems = planAdmin ? navItems.filter((item) => item.to === "/plans") : navItems;
+  const visibleNavItems = getVisibleNavItems(Boolean(planAdmin));
 
   const initials = user?.displayName
     ? user.displayName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()
     : (user?.email ?? planAdmin?.email)?.slice(0, 2).toUpperCase() ?? "?";
-
-  const renderItem = (item: (typeof navItems)[0]) => {
-    const active = location.pathname === item.to;
-    return (
-      <NavLink
-        key={item.to}
-        to={item.to}
-        onClick={() => mobileOpen && onClose?.()}
-        className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-          active
-            ? "bg-primary/10 text-primary"
-            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          collapsed && "justify-center px-2",
-        )}
-      >
-        <item.icon className="h-4.5 w-4.5 shrink-0" />
-        {!collapsed && <span>{item.label}</span>}
-      </NavLink>
-    );
-  };
 
   return (
     <>
@@ -108,7 +63,26 @@ export function AppSidebar({
         <Separator className="bg-sidebar-border" />
 
         <nav className="flex-1 flex flex-col gap-0.5 p-2 overflow-y-auto">
-          {visibleNavItems.map(renderItem)}
+          {visibleNavItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end
+              onClick={() => mobileOpen && onClose?.()}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  collapsed && "justify-center px-2",
+                )
+              }
+            >
+              <item.icon className="h-4.5 w-4.5 shrink-0" />
+              {!collapsed && <span>{item.label}</span>}
+            </NavLink>
+          ))}
         </nav>
 
         <Separator className="bg-sidebar-border" />
